@@ -23,20 +23,25 @@ function makeDiamond() {
   diamondGfx = createGraphics(dw, dh);
   diamondGfx.textAlign(CENTER, CENTER);
   diamondGfx.textSize(Math.min(cellW, cellH) * 1.5);
-  diamondGfx.text("💎", dw / 2, dh / 2);
+  diamondGfx.push();
+  diamondGfx.angleMode(DEGREES);
+  diamondGfx.translate(dw / 2, dh / 2);
+  diamondGfx.rotate(-90);
+  diamondGfx.text("💎", 0, 0);
+  diamondGfx.pop();
 }
 
 function draw() {
   // Get current theme
   const theme = currentTheme || "green-black";
-  
+
   // Show settings button during gameplay
   if (snake && !gameOver) {
     document.getElementById("settingsBtn").classList.remove("hidden");
   } else {
     document.getElementById("settingsBtn").classList.add("hidden");
   }
-  
+
   if (!snake) {
     if (theme === "sky-canvas") {
       // Draw video on canvas for sky-canvas theme
@@ -55,7 +60,7 @@ function draw() {
     }
     return;
   }
-  
+
   // Apply background based on theme
   if (theme === "sky-canvas") {
     const bgVideo = document.getElementById("bgVideo");
@@ -69,16 +74,16 @@ function draw() {
   } else {
     background("#A9E000");
   }
-  
+
   // stroke(20, 22, 28);
   // strokeWeight(0.3);
   noStroke();
-  
+
   // Set grid color based on theme
   if (theme === "green-black") {
     stroke(20, 22, 28, 100);
   } else if (theme === "sky-transparent" || theme === "sky-canvas") {
-    stroke(255, 255, 255, 30);  // Light grid for sky backgrounds
+    stroke(255, 255, 255, 30); // Light grid for sky backgrounds
   }
   strokeWeight(0.5);
   noStroke();
@@ -134,23 +139,53 @@ function draw() {
     // }
 
     fill("black");
-    let gap = cellW * 0.1;
-    rect(px, py, sw / 4, sh / 4);
-    rect(px + gap + sw / 4, py, sw / 4, sh / 4);
-    rect(px + 2 * gap + (2 * sw) / 4, py, sw / 4, sh / 4);
+    let gap = cellW * 0.08;
+    // rect(px, py, sw / 4, sh / 4);
+    // rect(px + gap + sw / 4, py, sw / 4, sh / 4);
+    // rect(px + 2 * gap + (2 * sw) / 4, py, sw / 4, sh / 4);
 
-    rect(px, py + gap + sh / 4, sw / 4, sh / 4);
-    rect(px + gap + sw / 4, py + gap + sh / 4, sw / 4, sh / 4);
-    rect(px + 2 * gap + (2 * sw) / 4, py + gap + sh / 4, sw / 4, sh / 4);
+    // rect(px, py + gap + sh / 4, sw / 4, sh / 4);
+    // rect(px + gap + sw / 4, py + gap + sh / 4, sw / 4, sh / 4);
+    // rect(px + 2 * gap + (2 * sw) / 4, py + gap + sh / 4, sw / 4, sh / 4);
 
-    rect(px, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
-    rect(px + gap + sw / 4, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
-    rect(
-      px + 2 * gap + (2 * sw) / 4,
-      py + 2 * gap + (2 * sh) / 4,
-      sw / 4,
-      sh / 4,
-    );
+    // rect(px, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
+    // rect(px + gap + sw / 4, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
+    // rect(
+    //   px + 2 * gap + (2 * sw) / 4,
+    //   py + 2 * gap + (2 * sh) / 4,
+    //   sw / 4,
+    //   sh / 4,
+    // );
+
+    // if (i === 0) {
+      // rect(px, py, sw / 4, sh / 2);
+      // rect(px + sw / 4 + gap, py - sh / 2, sw / 4, sh / 2);
+      // rect(px + (2 * sw) / 4 + 2 * gap, py, sw / 4, sh / 2);
+      // rect(px + (3 * sw) / 4 + 3 * gap, py, sw / 4, sh / 2);
+
+      // rect(px + sw / 4, py + sh / 2, sw / 4, sh / 2);
+      // rect(px + (2 * sw) / 4 + gap, py + sh / 2, sw / 4, sh / 2);
+      // rect(px + (3 * sw) / 4 + 2 * gap, py + sh / 2, sw / 4, sh / 2);
+      // rect(px + (4 * sw) / 4 + 3 * gap, py + sh / 2, sw / 4, sh / 2);
+      push()
+      noFill()
+      // fill("black")
+      stroke("black")
+      strokeWeight(2)
+      // rect(px + 2 * gap, py + gap, sw - 2 * gap, sh - 2 * gap);
+      pop()
+      // rect(px + 6*gap, py + 2*gap, sw/4, sh/4);
+      // rect(px + 6*gap, py + 7*gap, sw/4, sh/4);
+
+    // } else {
+      rect(px, py, sw / 4, sh / 2);
+      rect(px + sw / 4 + gap, py, sw / 4, sh / 2);
+      rect(px + (2 * sw) / 4 + 2 * gap, py, sw / 4, sh / 2);
+
+      rect(px + sw / 4, py + sh / 2, sw / 4, sh / 2);
+      rect(px + (2 * sw) / 4 + gap, py + sh / 2, sw / 4, sh / 2);
+      rect(px + (3 * sw) / 4 + 2 * gap, py + sh / 2, sw / 4, sh / 2);
+    // }
   }
   updateHUD();
 }

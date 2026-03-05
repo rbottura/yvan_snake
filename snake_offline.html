@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Snake (Offline Bundle)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+/* inlined style.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /* background: #0a0a0f; */
+  background: #A9E000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  font-family: "Courier New", monospace;
+  color: #eee;
+  overflow: hidden;
+}
+
+body.theme-sky-transparent {
+  background: transparent;
+}
+
+body.theme-sky-canvas {
+  background: #0a0a0f;
+}
+
+#hud {
+  /* display: flex; */
+  display: none;
+  gap: 32px;
+  align-items: center;
+  padding: 8px 20px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  width: 100%;
+  justify-content: center;
+}
+
+.stat {
+  font-size: 13px;
+  color: #888;
+}
+
+.stat span {
+  color: #7fff7f;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+#modeBtn {
+  padding: 5px 16px;
+  border-radius: 20px;
+  border: 1px solid #444;
+  background: #1a1a2e;
+  color: #adf;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#modeBtn.manual {
+  background: #1a2e1a;
+  border-color: #7fa;
+  color: #aff;
+}
+
+canvas {
+  display: block;
+  transform: scale(0.95);
+  border: dashed 8px black;
+}
+
+body.theme-sky-transparent canvas {
+  background: transparent !important;
+}
+
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+#overlay h1 {
+  font-size: 48px;
+  color: #7fff7f;
+  letter-spacing: 8px;
+  margin-bottom: 8px;
+}
+
+#overlay p {
+  color: #888;
+  margin-bottom: 24px;
+  font-size: 14px;
+  text-align: center;
+}
+
+#overlay .oscore {
+  font-size: 28px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+#overlay button {
+  padding: 12px 36px;
+  background: #7fff7f22;
+  border: 1px solid #7fff7f;
+  color: #7fff7f;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  letter-spacing: 3px;
+}
+
+#overlay.hidden {
+  display: none;
+}
+
+.settings-btn {
+  position: fixed;
+  right: 5px;
+  top: 5px;
+  z-index: 99;
+  padding: 6px 6px;
+  background: none;
+  border: none;
+  color: black;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  letter-spacing: 2px;
+  transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+  background: #eeeeee;
+  box-shadow: 0 0 10px rgba(127, 255, 127, 0.3);
+}
+
+.settings-btn.hidden {
+  display: none;
+}
+
+.settings-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background: rgba(15, 15, 25, 0.95);
+  border-left: 2px solid #7fff7f;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.8);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.settings-panel.shown {
+  transform: translateX(0);
+}
+
+.settings-panel.hidden {
+  display: none;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.settings-header h2 {
+  font-size: 18px;
+  color: #7fff7f;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #7fff7f;
+}
+
+.settings-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section label {
+  color: #aaa;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-toggle {
+  padding: 6px 12px;
+  background: #1a2e1a;
+  border: 1px solid #7fa;
+  color: #aff;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  flex: 1;
+  transition: all 0.2s ease;
+}
+
+.mode-toggle.autopilot {
+  background: #1a2e1a;
+  border-color: #7fa;
+  color: #aff;
+}
+
+.mode-toggle.manual {
+  background: #2e1a1a;
+  border-color: #fa7;
+  color: #faa;
+}
+
+.settings-section input[type="range"] {
+  cursor: pointer;
+  flex: 1;
+}
+
+#speedValue {
+  color: #7fff7f;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: right;
+}
+
+.settings-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+  padding-bottom: 20px;
+}
+
+.settings-action-btn {
+  padding: 12px 16px;
+  border: 1px solid #7fff7f;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s ease;
+}
+
+.settings-action-btn.resume {
+  background: #1a3a1a;
+  color: #7fff7f;
+  border-color: #7fff7f;
+}
+
+.settings-action-btn.resume:hover {
+  background: #2a5a2a;
+  box-shadow: 0 0 10px rgba(127, 255, 127, 0.3);
+}
+
+.settings-action-btn.restart {
+  background: #3a1a1a;
+  color: #ff8a7f;
+  border-color: #ff8a7f;
+}
+
+.settings-action-btn.restart:hover {
+  background: #5a2a2a;
+  box-shadow: 0 0 10px rgba(255, 138, 127, 0.3);
+}
+
+    </style>
+  </head>
+  <body>
+    <video id="bgVideo" autoplay muted loop style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
+      <source src="sky.mp4" type="video/mp4">
+    </video>
+    <div id="hud">
+      <div class="stat">SCORE <span id="scoreDisplay">0</span></div>
+      <div class="stat">LENGTH <span id="lengthDisplay">3</span></div>
+      <div class="stat">SPEED <span id="speedDisplay">0</span> fps</div>
+      <button id="modeBtn">🤖 AUTOPILOT</button>
+      <button id="pauseBtn">⏸ PAUSE</button>
+      <div class="stat" style="font-size: 11px; color: #555">
+        M = toggle · ↑↓←→ / WASD
+      </div>
+    </div>
+    <button id="settingsBtn" class="settings-btn hidden">🛠</button>
+    <div id="settingsPanel" class="settings-panel hidden">
+      <div class="settings-header">
+        <h2>SETTINGS</h2>
+        <button class="close-btn" id="closesettingsBtn">✕</button>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section">
+          <label style="color:#aaa; font-size:13px;">Mode
+            <button id="inGameModeBtn" class="mode-toggle">🤖 AUTOPILOT</button>
+          </label>
+        </div>
+        <div class="settings-section">
+          <label style="color:#aaa; font-size:13px">Speed <input id="inGameSpeed" type="range" min="1" max="60" value="20" style="width:140px; margin-left:6px;"/><span id="speedValue">20</span> fps</label>
+        </div>
+        <div class="settings-button-group">
+          <button id="resumeBtn" class="settings-action-btn resume">▶ RESUME</button>
+          <button id="restartBtn" class="settings-action-btn restart">↺ RESTART</button>
+        </div>
+      </div>
+    </div>
+    <div id="overlay">
+      <h1>SNAKE</h1>
+      <p>Autopilot ON by default — press <b>M</b> to take manual control</p>
+      <div style="margin-bottom:16px; display:flex; gap:12px; align-items:center;">
+        <label style="color:#aaa; font-size:13px">Cols <input id="inputCols" type="number" min="5" max="250" value="110" style="width:64px; margin-left:6px;"/></label>
+        <label style="color:#aaa; font-size:13px">Rows <input id="inputRows" type="number" min="5" max="150" value="70" style="width:64px; margin-left:6px;"/></label>
+        <label style="color:#aaa; font-size:13px">Speed <input id="inputSpeed" type="number" min="1" max="60" value="20" style="width:64px; margin-left:6px;"/></label>
+      </div>
+      <div style="margin-bottom:16px; display:flex; gap:12px; align-items:center;">
+        <label style="color:#aaa; font-size:13px">Theme
+          <select id="themeSelect" style="width:120px; margin-left:6px; padding:4px; background:#1a1a2e; color:#adf; border:1px solid #444; border-radius:2px;">
+            <option value="green-black">Green & Black</option>
+            <option value="sky-transparent">Sky (Transparent)</option>
+            <option value="sky-canvas">Sky (Canvas)</option>
+          </select>
+        </label>
+      </div>
+      <div class="oscore" id="finalScore"></div>
+      <button id="startBtn">▶ START</button>
+    </div>
+
+    <!-- p5 is referenced as a local file: include p5.min.js next to this HTML -->
+    <script src="p5.min.js"></script>
+
+    <script>
+// ---- inlined ai.js ----
+// ai.js - pathfinding and heuristic helpers
+function hamIdx(x, y) {
+  return y % 2 === 0
+    ? y * CFG.COLS + x
+    : y * CFG.COLS + (CFG.COLS - 1 - x);
+}
+
+function bfs(start, goal, blocked) {
+  const key = (p) => p.x + "," + p.y;
+  const queue = [{ pos: start, path: [] }];
+  const vis = new Set([key(start)]);
+  const ds = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+  ];
+  while (queue.length) {
+    const { pos, path } = queue.shift();
+    for (const d of ds) {
+      const nx = pos.x + d.x,
+        ny = pos.y + d.y;
+      if (nx < 0 || nx >= CFG.COLS || ny < 0 || ny >= CFG.ROWS) continue;
+      const k = nx + "," + ny;
+      if (vis.has(k) || blocked.has(k)) continue;
+      const np = [...path, d];
+      if (nx === goal.x && ny === goal.y) return np;
+      vis.add(k);
+      queue.push({ pos: { x: nx, y: ny }, path: np });
+    }
+  }
+  return null;
+}
+
+function getAIDir() {
+  const head = snake[0];
+  const sset = new Set(snake.map((s) => s.x + "," + s.y));
+  const path = bfs(head, apple, sset);
+  if (path && path.length > 0) {
+    const d = path[0];
+    const nh = { x: head.x + d.x, y: head.y + d.y };
+    const sim = [nh, ...snake];
+    if (!(nh.x === apple.x && nh.y === apple.y)) sim.pop();
+    const simSet = new Set(sim.slice(0, -1).map((p) => p.x + "," + p.y));
+    const tail = sim[sim.length - 1];
+    if (bfs(nh, tail, simSet)) return d;
+  }
+  const hi = hamIdx(head.x, head.y);
+  const ds = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 },
+  ];
+  let best = null,
+    bestDiff = Infinity;
+  for (const d of ds) {
+    const nx = head.x + d.x,
+      ny = head.y + d.y;
+    if (nx < 0 || nx >= CFG.COLS || ny < 0 || ny >= CFG.ROWS) continue;
+    if (sset.has(nx + "," + ny)) continue;
+    const ni = hamIdx(nx, ny);
+    const diff = (ni - hi + CFG.COLS * CFG.ROWS) % (CFG.COLS * CFG.ROWS);
+    if (diff > 0 && diff < bestDiff) {
+      bestDiff = diff;
+      best = d;
+    }
+  }
+  if (best) return best;
+  for (const d of ds) {
+    const nx = head.x + d.x,
+      ny = head.y + d.y;
+    if (nx < 0 || nx >= CFG.COLS || ny < 0 || ny >= CFG.ROWS) continue;
+    if (!sset.has(nx + "," + ny)) return d;
+  }
+  return dir;
+}
+    </script>
+
+    <script>
+// ---- inlined game.js ----
+// game.js - game state and core logic
+const CFG = { COLS: 19, ROWS: 11, BASE_FPS: 5 };
+let snake, apple, dir, nextDir, score, gameOver, autopilot, frameAcc;
+let paused = false;
+
+function resetGame() {
+  const cx = Math.floor(CFG.COLS / 2), cy = Math.floor(CFG.ROWS / 2);
+  snake = [
+    { x: cx, y: cy },
+    { x: cx - 1, y: cy },
+    { x: cx - 2, y: cy },
+  ];
+  dir = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  score = 0;
+  gameOver = false;
+  frameAcc = 0;
+  paused = false;
+  placeApple();
+}
+
+function placeApple() {
+  const occ = new Set(snake.map((s) => s.x + "," + s.y));
+  let ax, ay;
+  do {
+    ax = Math.floor(Math.random() * CFG.COLS);
+    ay = Math.floor(Math.random() * CFG.ROWS);
+  } while (occ.has(ax + "," + ay));
+  apple = { x: ax, y: ay };
+}
+
+function doStep() {
+  if (autopilot) {
+    dir = getAIDir();
+  } else {
+    if (!(nextDir.x === -dir.x && nextDir.y === -dir.y)) dir = nextDir;
+  }
+  const head = snake[0];
+  const nh = { x: head.x + dir.x, y: head.y + dir.y };
+  if (nh.x < 0 || nh.x >= CFG.COLS || nh.y < 0 || nh.y >= CFG.ROWS) {
+    endGame();
+    return;
+  }
+  for (let i = 0; i < snake.length - 1; i++) if (snake[i].x === nh.x && snake[i].y === nh.y) {
+    endGame();
+    return;
+  }
+  snake.unshift(nh);
+  if (nh.x === apple.x && nh.y === apple.y) {
+    score++;
+    CFG.BASE_FPS = Math.min(CFG.BASE_FPS, CFG.BASE_FPS + Math.floor(score / 15));
+    placeApple();
+  } else {
+    snake.pop();
+  }
+}
+
+function endGame() {
+  gameOver = true;
+  const text = "Score: " + score + "  |  Length: " + snake.length;
+  if (typeof showGameOver === "function") showGameOver(text);
+}
+    </script>
+
+    <script>
+// ---- inlined ui.js ----
+// ui.js - DOM interactions and HUD/overlay handling
+const overlay = document.getElementById("overlay");
+const finalScoreEl = document.getElementById("finalScore");
+const startBtn = document.getElementById("startBtn");
+const modeBtn = document.getElementById("modeBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+
+const inputCols = document.getElementById("inputCols");
+const inputRows = document.getElementById("inputRows");
+const inputSpeed = document.getElementById("inputSpeed");
+const themeSelect = document.getElementById("themeSelect");
+const bgVideo = document.getElementById("bgVideo");
+
+// Settings panel elements
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsPanel = document.getElementById("settingsPanel");
+const closeSettingsBtn = document.getElementById("closesettingsBtn");
+const inGameModeBtn = document.getElementById("inGameModeBtn");
+const inGameSpeed = document.getElementById("inGameSpeed");
+const speedValue = document.getElementById("speedValue");
+const resumeBtn = document.getElementById("resumeBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+let currentTheme = "green-black"; // default theme
+let wasGameRunning = false;
+let autoRestartInterval = null;
+let autoRestartRemaining = 0;
+
+function cancelAutoRestart() {
+  if (autoRestartInterval) {
+    clearInterval(autoRestartInterval);
+    autoRestartInterval = null;
+    autoRestartRemaining = 0;
+  }
+  const countdownEl = document.getElementById('autoRestartCountdown');
+  if (countdownEl && countdownEl.parentNode) countdownEl.parentNode.removeChild(countdownEl);
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.body.className = theme === "green-black" ? "" : `theme-${theme}`;
+  
+  // Show/hide video based on theme
+  if (theme === "sky-transparent" || theme === "sky-canvas") {
+    bgVideo.style.display = "block";
+  } else {
+    bgVideo.style.display = "none";
+  }
+}
+
+function toggleMode() {
+  autopilot = !autopilot;
+  modeBtn.textContent = autopilot ? "🤖 AUTOPILOT" : "🎮 MANUAL";
+  modeBtn.classList.toggle("manual", !autopilot);
+  // Update in-game mode button too
+  inGameModeBtn.textContent = autopilot ? "🤖 AUTOPILOT" : "🎮 MANUAL";
+  inGameModeBtn.classList.toggle("autopilot", autopilot);
+  inGameModeBtn.classList.toggle("manual", !autopilot);
+}
+
+function showGameOver(text) {
+  finalScoreEl.textContent = text;
+  overlay.querySelector("h1").textContent = "GAME OVER";
+  overlay.querySelector("p").textContent = "Press start to play again";
+  startBtn.textContent = "↺ RESTART";
+  overlay.classList.remove("hidden");
+  // Hide settings panel
+  hideSettingsPanel();
+  settingsBtn.classList.add("hidden");
+  // Start auto-restart countdown (5 seconds)
+  cancelAutoRestart();
+  autoRestartRemaining = 5;
+  // update UI countdown next to final score
+  const countdownNodeId = 'autoRestartCountdown';
+  let countdownEl = document.getElementById(countdownNodeId);
+  if (!countdownEl) {
+    countdownEl = document.createElement('div');
+    countdownEl.id = countdownNodeId;
+    countdownEl.style.marginTop = '8px';
+    countdownEl.style.color = '#aaa';
+    countdownEl.style.fontSize = '14px';
+    overlay.appendChild(countdownEl);
+  }
+  countdownEl.textContent = `Restarting in ${autoRestartRemaining}s...`;
+  autoRestartInterval = setInterval(() => {
+    autoRestartRemaining -= 1;
+    if (countdownEl) countdownEl.textContent = `Restarting in ${autoRestartRemaining}s...`;
+    if (autoRestartRemaining <= 0) {
+      cancelAutoRestart();
+      // start a fresh game with current CFG settings
+      overlay.classList.add('hidden');
+      if (typeof resetGame === 'function') resetGame();
+      updateHUD();
+      // ensure settings button visibility updates
+      if (snake && !gameOver) settingsBtn.classList.remove('hidden');
+    }
+  }, 1000);
+}
+
+function updateHUD() {
+  document.getElementById("scoreDisplay").textContent = score || 0;
+  document.getElementById("lengthDisplay").textContent = snake ? snake.length : 0;
+  document.getElementById("speedDisplay").textContent = CFG.BASE_FPS;
+}
+
+function togglePause() {
+  paused = !paused;
+  if (pauseBtn) pauseBtn.textContent = paused ? "▶ RESUME" : "⏸ PAUSE";
+}
+
+function showSettingsPanel() {
+  // Auto-pause the game
+  if (!paused && snake && !gameOver) {
+    wasGameRunning = true;
+    paused = true;
+    if (pauseBtn) pauseBtn.textContent = "▶ RESUME";
+  }
+  
+  // Update in-game settings to match current state
+  inGameModeBtn.textContent = autopilot ? "🤖 AUTOPILOT" : "🎮 MANUAL";
+  inGameModeBtn.classList.toggle("autopilot", autopilot);
+  inGameModeBtn.classList.toggle("manual", !autopilot);
+  inGameSpeed.value = CFG.BASE_FPS;
+  speedValue.textContent = CFG.BASE_FPS;
+  
+  settingsPanel.classList.remove("hidden");
+  settingsPanel.classList.add("shown");
+}
+
+function hideSettingsPanel() {
+  settingsPanel.classList.remove("shown");
+  settingsPanel.classList.add("hidden");
+  wasGameRunning = false;
+}
+
+startBtn.addEventListener("click", () => {
+  // Cancel auto-restart if running (user manually starting)
+  cancelAutoRestart();
+  // Apply selected theme
+  const selectedTheme = themeSelect.value;
+  applyTheme(selectedTheme);
+  
+  // read config inputs
+  const cols = parseInt(inputCols.value, 10) || CFG.COLS;
+  const rows = parseInt(inputRows.value, 10) || CFG.ROWS;
+  const speed = parseInt(inputSpeed.value, 10) || CFG.BASE_FPS;
+  CFG.COLS = Math.max(5, cols);
+  CFG.ROWS = Math.max(5, rows);
+  CFG.BASE_FPS = Math.max(1, Math.min(60, speed));
+  console.log(rows, cols, speed);
+  // resize canvas to new grid
+  if (typeof windowResized === "function") windowResized();
+  overlay.classList.add("hidden");
+  if (typeof resetGame === "function") resetGame();
+  updateHUD();
+});
+
+modeBtn.addEventListener("click", toggleMode);
+if (pauseBtn) pauseBtn.addEventListener("click", togglePause);
+
+// Settings panel event listeners
+settingsBtn.addEventListener("click", showSettingsPanel);
+closeSettingsBtn.addEventListener("click", hideSettingsPanel);
+
+resumeBtn.addEventListener("click", () => {
+  // Resume the paused game
+  cancelAutoRestart();
+  paused = false;
+  if (pauseBtn) pauseBtn.textContent = "⏸ PAUSE";
+  hideSettingsPanel();
+});
+
+restartBtn.addEventListener("click", () => {
+  // Reset game with current settings overlay
+  cancelAutoRestart();
+  hideSettingsPanel();
+  overlay.querySelector("h1").textContent = "SNAKE";
+  overlay.querySelector("p").textContent = "Autopilot ON by default — press <b>M</b> to take manual control";
+  startBtn.textContent = "▶ START";
+  overlay.classList.remove("hidden");
+  settingsBtn.classList.add("hidden");
+  // Reset cols and rows to current (or user can change them)
+  inputCols.value = CFG.COLS;
+  inputRows.value = CFG.ROWS;
+  inputSpeed.value = CFG.BASE_FPS;
+});
+
+inGameModeBtn.addEventListener("click", toggleMode);
+
+inGameSpeed.addEventListener("input", (e) => {
+  const newSpeed = parseInt(e.target.value, 10);
+  speedValue.textContent = newSpeed;
+  CFG.BASE_FPS = Math.max(1, Math.min(60, newSpeed));
+  updateHUD();
+});
+
+    </script>
+
+    <script>
+// ---- inlined sketch.js ----
+// sketch.js - p5 global-mode sketch and rendering
+let cellW, cellH, canvasW, canvasH, diamondGfx;
+
+function setup() {
+  const hudH = document.getElementById("hud").offsetHeight;
+  canvasW = window.innerWidth;
+  canvasH = window.innerHeight - hudH;
+  cellW = canvasW / CFG.COLS;
+  cellH = canvasH / CFG.ROWS;
+  // Create canvas with alpha for transparency support
+  const cnv = createCanvas(canvasW, canvasH);
+  cnv.parent(document.body);
+  // Enable alpha for transparent canvas
+  cnv.canvas.style.opacity = "1";
+  frameRate(60);
+  makeDiamond();
+  autopilot = true;
+}
+
+function makeDiamond() {
+  const dw = Math.ceil(cellW * 2.8),
+    dh = Math.ceil(cellH * 2.8);
+  diamondGfx = createGraphics(dw, dh);
+  diamondGfx.textAlign(CENTER, CENTER);
+  diamondGfx.textSize(Math.min(cellW, cellH) * 1.5);
+  diamondGfx.text("💎", dw / 2, dh / 2);
+}
+
+function draw() {
+  // Get current theme
+  const theme = currentTheme || "green-black";
+  
+  // Show settings button during gameplay
+  if (snake && !gameOver) {
+    document.getElementById("settingsBtn").classList.remove("hidden");
+  } else {
+    document.getElementById("settingsBtn").classList.add("hidden");
+  }
+  
+  if (!snake) {
+    if (theme === "sky-canvas") {
+      // Draw video on canvas for sky-canvas theme
+      const bgVideo = document.getElementById("bgVideo");
+      if (bgVideo && bgVideo.readyState === bgVideo.HAVE_ENOUGH_DATA) {
+        image(bgVideo, 0, 0, canvasW, canvasH);
+      } else {
+        background("#1a1a1a");
+      }
+    } else if (theme === "sky-transparent") {
+      // Transparent background - video shows through
+      clear();
+    } else {
+      // Default green-black theme
+      background("#A9E000");
+    }
+    return;
+  }
+  
+  // Apply background based on theme
+  if (theme === "sky-canvas") {
+    const bgVideo = document.getElementById("bgVideo");
+    if (bgVideo && bgVideo.readyState === bgVideo.HAVE_ENOUGH_DATA) {
+      image(bgVideo, 0, 0, canvasW, canvasH);
+    } else {
+      background("#1a1a1a");
+    }
+  } else if (theme === "sky-transparent") {
+    clear();
+  } else {
+    background("#A9E000");
+  }
+  
+  // stroke(20, 22, 28);
+  // strokeWeight(0.3);
+  noStroke();
+  
+  // Set grid color based on theme
+  if (theme === "green-black") {
+    stroke(20, 22, 28, 100);
+  } else if (theme === "sky-transparent" || theme === "sky-canvas") {
+    stroke(255, 255, 255, 30);  // Light grid for sky backgrounds
+  }
+  strokeWeight(0.5);
+  noStroke();
+  for (let x = 0; x <= CFG.COLS; x++) line(x * cellW, 0, x * cellW, canvasH);
+  for (let y = 0; y <= CFG.ROWS; y++) line(0, y * cellH, canvasW, y * cellH);
+  if (gameOver) return;
+  if (!paused) {
+    frameAcc += deltaTime / 1000;
+    const step = 1 / CFG.BASE_FPS;
+    while (frameAcc >= step) {
+      frameAcc -= step;
+      doStep();
+    }
+  } else {
+    // draw paused indicator
+    push();
+    fill(255, 255, 255, 64);
+    textAlign(CENTER, CENTER);
+    textSize(Math.min(cellW, cellH) * 0.9);
+    text("PAUSED", width / 2, height / 2);
+    pop();
+  }
+  const dw = diamondGfx.width,
+    dh = diamondGfx.height;
+  image(
+    diamondGfx,
+    apple.x * cellW - (dw - cellW) / 2,
+    apple.y * cellH - (dh - cellH) / 2,
+  );
+  for (let i = snake.length - 1; i >= 0; i--) {
+    const t = 1 - i / snake.length;
+    const r = lerp(30, 80, t),
+      g = lerp(100, 220, t),
+      b = lerp(60, 120, t);
+    fill(r, g, b);
+    const seg = snake[i];
+    const px = seg.x * cellW,
+      py = seg.y * cellH;
+    const sw = cellW * 1,
+      sh = cellH * 1;
+    fill("black");
+    // let gap = 3;
+    let gap = cellW * 0.1;
+    rect(px, py, sw / 4, sh / 4);
+    rect(px + gap + sw / 4, py, sw / 4, sh / 4);
+    rect(px + 2 * gap + (2 * sw) / 4, py, sw / 4, sh / 4);
+
+    rect(px, py + gap + sh / 4, sw / 4, sh / 4);
+    rect(px + gap + sw / 4, py + gap + sh / 4, sw / 4, sh / 4);
+    rect(px + 2 * gap + (2 * sw) / 4, py + gap + sh / 4, sw / 4, sh / 4);
+
+    rect(px, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
+    rect(px + gap + sw / 4, py + 2 * gap + (2 * sh) / 4, sw / 4, sh / 4);
+    rect(
+      px + 2 * gap + (2 * sw) / 4,
+      py + 2 * gap + (2 * sh) / 4,
+      sw / 4,
+      sh / 4,
+    );
+  }
+  updateHUD();
+}
+
+function keyPressed() {
+  const k = keyCode,
+    K = (key || "").toUpperCase();
+  if (K === "M") {
+    toggleMode();
+    return;
+  }
+  if (K === "P") {
+    if (typeof togglePause === "function") togglePause();
+    return;
+  }
+  if (!autopilot) {
+    if (k === UP_ARROW || K === "W") nextDir = { x: 0, y: -1 };
+    if (k === DOWN_ARROW || K === "S") nextDir = { x: 0, y: 1 };
+    if (k === LEFT_ARROW || K === "A") nextDir = { x: -1, y: 0 };
+    if (k === RIGHT_ARROW || K === "D") nextDir = { x: 1, y: 0 };
+  }
+}
+
+function windowResized() {
+  const hudH = document.getElementById("hud").offsetHeight;
+  canvasW = window.innerWidth;
+  canvasH = window.innerHeight - hudH;
+  cellW = canvasW / CFG.COLS;
+  cellH = canvasH / CFG.ROWS;
+  resizeCanvas(canvasW, canvasH);
+  makeDiamond();
+}
+
+    </script>
+  </body>
+</html>

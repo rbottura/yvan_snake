@@ -66,7 +66,7 @@ body.theme-sky-canvas {
 canvas {
   display: block;
   transform: scale(0.95);
-  border: dashed 8px black;
+  border: dashed 4px black;
 }
 
 body.theme-sky-transparent canvas {
@@ -296,4 +296,8 @@ body.theme-sky-transparent canvas {
 .settings-action-btn.restart:hover {
   background: #5a2a2a;
   box-shadow: 0 0 10px rgba(255, 138, 127, 0.3);
+}
+
+video {
+  filter: blur(16px) contrast(1.4);
 }
