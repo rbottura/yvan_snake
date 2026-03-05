@@ -100,7 +100,7 @@ function draw() {
   } else {
     // draw paused indicator
     push();
-    fill(255, 255, 255, 64);
+    fill(0, 0, 0);
     textAlign(CENTER, CENTER);
     textSize(Math.min(cellW, cellH) * 0.9);
     text("PAUSED", width / 2, height / 2);
